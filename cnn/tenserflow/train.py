@@ -1,7 +1,7 @@
 # coding=utf-8
 # ! /usr/bin/env python
 
-import tensorflow as tf
+import TF as tf
 import numpy as np
 import os
 import time

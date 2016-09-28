@@ -13,8 +13,11 @@ y_data = x_data * 0.1 + 0.3
 # 定义参数weight biases 拟合公式y 误差公式loss
 Weights = tf.Variable(tf.random_uniform([1], -1.0, 1.0))
 biases = tf.Variable(tf.zeros([1]))
-
 y = Weights * x_data + biases
+# y = tf.matmul(x_data, Weights) + biases
+
+# predict = tf.nn.relu(y)
+# loss function
 loss = tf.reduce_mean(tf.square(y - y_data))
 
 # 选择gradient descent
@@ -37,3 +40,5 @@ for step in range(100):
     sess.run(train)
     if step % 20 == 0:
         print(step, sess.run(Weights), sess.run(biases))
+print sess.run(y)
+

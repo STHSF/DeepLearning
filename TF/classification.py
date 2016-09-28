@@ -50,10 +50,10 @@ prediction = add_layer(xs, 784, 10, activation_function=tf.nn.softmax)  # softma
 '''4.定义 loss 表达式'''
 # 分类问题
 # the error between prediction and real data
-# loss 函数用 cross entropy
+# loss 函数用 cross_entropy
 cross_entropy = tf.reduce_mean(-tf.reduce_sum(ys * tf.log(prediction), reduction_indices=[1]))  # loss
-
-train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
+optimizer = tf.train.GradientDescentOptimizer(0.5)
+train = optimizer.minimize(cross_entropy)
 
 # 初始化session
 sess = tf.Session()
@@ -65,7 +65,7 @@ sess.run(tf.initialize_all_variables())
 for i in range(2000):
 
     batch_xs, batch_ys = mnist_data.train.next_batch(100)
-    sess.run(train_step, feed_dict={xs: batch_xs, ys: batch_ys})
+    sess.run(train, feed_dict={xs: batch_xs, ys: batch_ys})
 
     if i % 10 == 0:
         print(compute_accuracy(mnist_data.test.images, mnist_data.test.labels))

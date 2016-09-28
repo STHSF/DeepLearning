@@ -18,6 +18,7 @@ def add_layer(inputs, in_size, out_size, activation_function=None):
         outputs = activation_function(wx_plus_b)
     return outputs
 
+
 '''1.训练的数据'''
 # Make up some real data
 x_data = np.linspace(-1, 1, 300)[:, np.newaxis]
@@ -34,10 +35,11 @@ ys = tf.placeholder(tf.float32, [None, 1])
 # 输入层只有一个属性,inputs=1
 l1 = add_layer(xs, 1, 10, activation_function=tf.nn.relu)  # relu是激励函数的一种
 l2 = add_layer(l1, 10, 20, activation_function=tf.nn.relu)
+l2 = add_layer(l1, 20, 30, activation_function=tf.nn.relu)
 
 # 输出层也只有一个属性,outputsize=1
 # add output layer 输入值是隐藏层 l1，在预测层输出 1 个结果
-p1 = add_layer(l2, 20, 10, activation_function=tf.nn.relu6)
+p1 = add_layer(l2, 30, 10, activation_function=tf.nn.relu6)
 prediction = add_layer(p1, 10, 1, activation_function=None)
 
 '''4.定义 loss 表达式'''
@@ -46,7 +48,8 @@ loss = tf.reduce_mean(tf.reduce_sum(tf.square(ys - prediction), reduction_indice
 
 '''5.选择 optimizer 使 loss 达到最小'''
 # 这一行定义了用什么方式去减少 loss，学习率是 0.1
-train_step = tf.train.RMSPropOptimizer(0.01).minimize(loss)  # 选择梯度下降法
+optimizer = tf.train.RMSPropOptimizer(0.0001)
+train = optimizer.minimize(loss)  # 选择梯度下降法
 
 # important step 对所有变量进行初始化
 init = tf.initialize_all_variables()
@@ -64,7 +67,7 @@ plt.show()
 
 for i in range(2000):
     # training
-    sess.run(train_step, feed_dict={xs: x_data, ys: y_data})
+    sess.run(train, feed_dict={xs: x_data, ys: y_data})
 
     if i % 10 == 0:
         # to visualize the result and improvement

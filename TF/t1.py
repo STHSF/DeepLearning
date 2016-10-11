@@ -3,6 +3,7 @@
 
 import tensorflow as tf
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 """单层神经网络"""
@@ -20,6 +21,7 @@ y = Weights * x_data + biases
 # loss function
 loss = tf.reduce_mean(tf.square(y - y_data))
 
+# 优化器选择
 # 选择gradient descent
 optimizer = tf.train.GradientDescentOptimizer(0.5)
 
@@ -40,5 +42,12 @@ for step in range(100):
     sess.run(train)
     if step % 20 == 0:
         print(step, sess.run(Weights), sess.run(biases))
-print sess.run(y)
+
+res = sess.run(y)
+
+fig = plt.figure()
+ax = fig.add_subplot(1, 1, 1)
+ax.plot(x_data, y_data, "-")
+ax.plot(x_data, res)
+plt.show()
 

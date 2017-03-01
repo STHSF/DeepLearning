@@ -15,6 +15,7 @@ LR = 0.006
 
 
 def get_batch():
+    # 生成数据
     global BATCH_START, TIME_STEPS
     # xs shape (50batch, 20steps)
     xs = np.arange(BATCH_START, BATCH_START+TIME_STEPS*BATCH_SIZE).reshape((BATCH_SIZE, TIME_STEPS)) / (10*np.pi)
@@ -110,13 +111,13 @@ class LSTMRNN(object):
 
         return tf.square(tf.sub(y_pre, y_target))
 
-    def _weight_variable(self, shape, name='weights'):
+    def _weight_variable(self, shape, name='weights_1'):
 
         initializer = tf.random_normal_initializer(mean=0., stddev=1.,)
 
         return tf.get_variable(shape=shape, initializer=initializer, name=name)
 
-    def _bias_variable(self, shape, name='biases'):
+    def _bias_variable(self, shape, name='biases_1'):
 
         initializer = tf.constant_initializer(0.1)
 

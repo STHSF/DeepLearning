@@ -11,11 +11,11 @@ import matplotlib.pyplot as plt
 x_data = np.random.rand(100).astype(np.float32)
 y_data = x_data * 0.1 + 0.3
 
-# 定义参数weight biases 拟合公式y 误差公式loss
+# 定义参数weight biases_1 拟合公式y 误差公式loss
 Weights = tf.Variable(tf.random_uniform([1], -1.0, 1.0))
 biases = tf.Variable(tf.zeros([1]))
 y = Weights * x_data + biases
-# y = tf.matmul(x_data, Weights) + biases
+# y = tf.matmul(x_data, Weights) + biases_1
 
 # predict = tf.nn.relu(y)
 # loss function

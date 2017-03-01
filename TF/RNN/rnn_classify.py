@@ -21,7 +21,7 @@ n_classes = 10      # MNIST classes (0-9 digits)
 x = tf.placeholder(tf.float32, [None, n_steps, n_inputs])
 y = tf.placeholder(tf.float32, [None, n_classes])
 
-# Define weights
+# Define weights_1
 weights = {
     # (28, 128)
     'in': tf.Variable(tf.random_normal([n_inputs, n_hidden_units])),
@@ -71,7 +71,7 @@ def rnn(input_data, weights, biases):
 
     # hidden layer for output as the final results
     #############################################
-    # results = tf.matmul(final_state[1], weights['out']) + biases['out']
+    # results = tf.matmul(final_state[1], weights_1['out']) + biases_1['out']
 
     # # or
     # unpack to list [(batch, outputs)..] * steps
@@ -82,7 +82,8 @@ def rnn(input_data, weights, biases):
 
 
 predict = rnn(x, weights, biases)
-cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(predict, y))
+optimizer = tf.nn.softmax_cross_entropy_with_logits(predict, y)
+cost = tf.reduce_mean(optimizer)
 train = tf.train.AdamOptimizer(lr).minimize(cost)
 
 correct_predict = tf.equal(tf.argmax(predict, 1), tf.argmax(y, 1))
@@ -96,7 +97,9 @@ with tf.Session() as sess:
     while step * batch_size < training_iters:
         batch_xs, batch_ys = mnist.train.next_batch(batch_size)
         batch_xs = batch_xs.reshape([batch_size, n_steps, n_inputs])
+        print batch_xs.shape
+        print batch_ys.shape
         sess.run([train], feed_dict={x: batch_xs, y: batch_ys, })
-        if step % 20 == 0:
-            print(sess.run(accuracy, feed_dict={x: batch_xs, y: batch_ys, }))
-        step += 1
+        # if step % 20 == 0:
+        #     print(sess.run(accuracy, feed_dict={x: batch_xs, y: batch_ys, }))
+        # step += 1

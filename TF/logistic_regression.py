@@ -35,11 +35,11 @@ ys = tf.placeholder(tf.float32, [None, 1])
 # 输入层只有一个属性,inputs=1
 l1 = add_layer(xs, 1, 10, activation_function=tf.nn.relu)  # relu是激励函数的一种
 l2 = add_layer(l1, 10, 20, activation_function=tf.nn.relu)
-l2 = add_layer(l1, 20, 30, activation_function=tf.nn.relu)
+l3 = add_layer(l2, 20, 30, activation_function=tf.nn.relu)
 
 # 输出层也只有一个属性,outputsize=1
 # add output layer 输入值是隐藏层 l1，在预测层输出 1 个结果
-p1 = add_layer(l2, 30, 10, activation_function=tf.nn.relu6)
+p1 = add_layer(l3, 30, 10, activation_function=tf.nn.relu6)
 prediction = add_layer(p1, 10, 1, activation_function=None)
 
 '''4.定义 loss 表达式'''

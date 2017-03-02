@@ -1,3 +1,4 @@
+# coding=utf-8
 import tensorflow as tf
 import numpy as np
 from six.moves import cPickle as pickle
@@ -28,7 +29,10 @@ num_labels = 10
 
 
 def reformat(dataset, labels):
+    """图片格式化"""
+    # 图片拉伸成向量 [28,28]===>[,28*28]
     dataset = dataset.reshape((-1, image_size * image_size)).astype(np.float32)
+    # 将lables构建成one-hot类型的向量
     labels = (np.arange(num_labels) == labels[:, None]).astype(np.float32)
     return dataset, labels
 
@@ -92,7 +96,7 @@ with graph.as_default():
 
 num_steps = 3001
 
-with tf.Session() as session:
+with tf.Session(graph=graph) as session:
     tf.global_variables_initializer().run()
     writer = tf.summary.FileWriter("log/", session.graph)
     print("Initialized")

@@ -75,7 +75,7 @@ for i in range(2000):
             ax.lines.remove(lines[0])
         except Exception:
             pass
-
+        # predict of the training data
         prediction_value = sess.run(prediction, feed_dict={xs: x_data})
         # plot the prediction
         lines = ax.plot(x_data, prediction_value, 'r-', lw=2)

@@ -59,11 +59,11 @@ with graph.as_default():
 
 
     def multi_layers(input_data, weight, baies):
-        with tf.name_scope('logits_1'):
+        with tf.name_scope('layer_1'):
             logits_1 = tf.matmul(input_data, weight['w1']) + baies['b1']
-        with tf.name_scope('hidden_layer'):
+        with tf.name_scope('relu'):
             hidden_layer = tf.nn.relu(logits_1, name='hidden_layer')
-        with tf.name_scope('logits_2'):
+        with tf.name_scope('layer_2'):
             logits_2 = tf.matmul(hidden_layer, weight['w2']) + baies['b2']
 
         return logits_2
@@ -100,6 +100,7 @@ num_steps = 3001
 with tf.Session(graph=graph) as session:
     tf.global_variables_initializer().run()
     writer = tf.summary.FileWriter("logss/", session.graph)
+    saver = tf.train.Saver()
 
     print("Initialized")
     for step in range(num_steps):
@@ -116,9 +117,12 @@ with tf.Session(graph=graph) as session:
         _, l, predictions = session.run(
             [optimizer, loss, train_prediction], feed_dict=feed_dict)
 
-        if (step % 500 == 0):
+        if step % 500 == 0:
             print("Minibatch loss at step %d: %f" % (step, l))
             print("Minibatch accuracy: %.1f%%" % accuracy(predictions, batch_labels))
             print("Validation accuracy: %.1f%%" % accuracy(
                 valid_prediction.eval(), valid_labels))
     print("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(), test_labels))
+
+    # 模型保存
+    saver.save(session, '/model')

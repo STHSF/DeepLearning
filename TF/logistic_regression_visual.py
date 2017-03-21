@@ -9,8 +9,8 @@ x_data = np.linspace(-1, 1, 300)[:, np.newaxis]
 noise = np.random.normal(0, 0.05, x_data.shape)
 y_data = np.square(x_data) - 0.5 + noise
 
-plt.figure(1)
-plt.plot(x_data, y_data, "r.")
+# plt.figure(1)
+# plt.plot(x_data, y_data, "r.")
 # plt.show()
 
 
@@ -42,9 +42,9 @@ def add_layer(inputs, in_size, out_size, activation_function=None):
     # 区别：大框架，定义层 layer，里面有 小部件
     with tf.name_scope('layer'):
         # 区别：小部件
-        with tf.name_scope('weights'):
+        with tf.name_scope('weights_1'):
             weights = tf.Variable(tf.random_normal([in_size, out_size]), name='W')
-        with tf.name_scope('biases'):
+        with tf.name_scope('biases_1'):
             biases = tf.Variable(tf.zeros([1, out_size]) + 0.1, name='b')
         with tf.name_scope('wx_plus_b'):
             wx_plus_b = tf.add(tf.matmul(inputs, weights), biases)
@@ -97,7 +97,7 @@ init = tf.initialize_all_variables()
 # 区别：sess.graph 把所有框架加载到一个文件中放到文件夹"logs/"里
 # 接着打开terminal，进入你存放的文件夹地址上一层，运行命令 tensorboard --logdir='logs/'
 # 会返回一个地址，然后用浏览器打开这个地址，在 graph 标签栏下打开
-writer = tf.train.SummaryWriter("logs/", sess.graph)
+writer = tf.summary.FileWriter("logs/", sess.graph)
 
 # important step
 sess.run(init)
@@ -125,13 +125,13 @@ for step in range(1000):
 #
 # # restore variables
 # # redefine the same shape and same type for your variables
-# W1 = tf.Variable(np.arange(6).reshape((2, 3)), dtype=tf.float32, name="weights")
-# b1 = tf.Variable(np.arange(3).reshape((1, 3)), dtype=tf.float32, name="biases")
+# W1 = tf.Variable(np.arange(6).reshape((2, 3)), dtype=tf.float32, name="weights_1")
+# b1 = tf.Variable(np.arange(3).reshape((1, 3)), dtype=tf.float32, name="biases_1")
 #
 # # not need init step
 # saver = tf.train.Saver()
 # # 用 saver 从路径中将 save_net.ckpt 保存的 W 和 b restore 进来
 # with tf.Session() as sess:
 #     saver.restore(sess, "my_net/save_net.ckpt")
-#     print("weights:", sess.run(W1))
-#     print("biases:", sess.run(b1))
+#     print("weights_1:", sess.run(W1))
+#     print("biases_1:", sess.run(b1))

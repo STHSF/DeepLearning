@@ -42,17 +42,15 @@ def average_pool_2x2(x):
 
 
 def add_cnn_layer(inputs, patch, inputsize,outputsize):
-    weight_conv = weight_variable([5, 5, inputsize, outputsize])  # patch 5x5, input size 1, output size 32
-    biases_conv = bias_variable([outputsize])
-    hidden_conv = tf.nn.relu(conv2d(inputs, weight_conv) + biases_conv)  # output size 28x28x32
-    hidden_pool = max_pool_2x2(hidden_conv)  # output size 14x14x32
+    weight_conv_layer = weight_variable([5, 5, inputsize, outputsize])  # patch 5x5, input size 1, output size 32
+    biases_conv_layer = bias_variable([outputsize])
+    hidden_conv_layer = tf.nn.relu(conv2d(inputs, weight_conv_layer) + biases_conv_layer)  # output size 28x28x32
+    hidden_pool = max_pool_2x2(hidden_conv_layer)  # output size 14x14x32
     return hidden_pool
 
 
 def add_func_layer(inputs, inputsize, outputsize):
-    height = inputsize[0]
-    width = inputsize[1]
-    depth = inputsize[2]
+    height = inputsize[0], width = inputsize[1], depth = inputsize[2]
     weight_func = weight_variable([height * width * depth, outputsize])
     biases_func = bias_variable([outputsize])
     # [n_samples, 7, 7, 64] ->> [n_samples, 7*7*64]
@@ -61,8 +59,7 @@ def add_func_layer(inputs, inputsize, outputsize):
     hidden_func_drop = tf.nn.dropout(hidden_func, keep_prob)
     return hidden_func_drop
 
-
-
+'''定义节点准备接收数据'''
 # define placeholder for inputs to network
 xs = tf.placeholder(tf.float32, [None, 784])  # 28x28
 ys = tf.placeholder(tf.float32, [None, 10])
@@ -72,25 +69,25 @@ x_image = tf.reshape(xs, [-1, 28, 28, 1])
 
 
 # conv1 layer #
-weight_conv1 = weight_variable([5, 5, 1, 32])  # patch 5x5, input size 1, output size 32
-biases_conv1 = bias_variable([32])
-hidden_conv1 = tf.nn.relu(conv2d(x_image, weight_conv1) + biases_conv1)  # output size 28x28x32
-hidden_pool1 = max_pool_2x2(hidden_conv1)  # output size 14x14x32
+weight_conv_layer1 = weight_variable([5, 5, 1, 32])  # patch 5x5, input size 1, output size 32
+biases_conv_layer1 = bias_variable([32])
+hidden_conv_layer1 = tf.nn.relu(conv2d(x_image, weight_conv_layer1) + biases_conv_layer1)  # output size 28x28x32
+hidden_pool_layer1 = max_pool_2x2(hidden_conv_layer1)  # output size 14x14x32
 
 
 # conv2 layer #
-weight_conv2 = weight_variable([5, 5, 32, 64])  # patch 5x5, input size 32, output size 64
-biases_conv2 = bias_variable([64])
-hidden_conv2 = tf.nn.relu(conv2d(hidden_pool1, weight_conv2) + biases_conv2)  # output size 14x14x64
-hidden_pool2 = max_pool_2x2(hidden_conv2)  # output size 7x7x64
+weight_conv_layer2 = weight_variable([5, 5, 32, 64])  # patch 5x5, input size 32, output size 64
+biases_conv_layer2 = bias_variable([64])
+hidden_conv_layer2 = tf.nn.relu(conv2d(hidden_pool_layer1, weight_conv_layer2) + biases_conv_layer2)  # output size 14x14x64
+hidden_pool_layer2 = max_pool_2x2(hidden_conv_layer2)  # output size 7x7x64
 
 
 # func1 layer #
-weight_fc1 = weight_variable([7 * 7 * 64, 1024])
+weight_func_layer1 = weight_variable([7 * 7 * 64, 1024])
 bias_fc1 = bias_variable([1024])
 # [n_samples, 7, 7, 64] ->> [n_samples, 7*7*64]
-hidden_pool2_flat = tf.reshape(hidden_pool2, [-1, 7 * 7 * 64])
-hidden_fc1 = tf.nn.relu(tf.matmul(hidden_pool2_flat, weight_fc1) + bias_fc1)
+hidden_pool2_flat = tf.reshape(hidden_pool_layer2, [-1, 7 * 7 * 64])
+hidden_fc1 = tf.nn.relu(tf.matmul(hidden_pool2_flat, weight_func_layer1) + bias_fc1)
 hidden_fc1_drop = tf.nn.dropout(hidden_fc1, keep_prob)
 
 # func2 layer #

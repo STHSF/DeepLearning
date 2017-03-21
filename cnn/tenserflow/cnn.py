@@ -1,6 +1,6 @@
 # coding=utf-8
 
-import TF as tf
+import tensorflow as tf
 import numpy as np
 
 ##########################################################################

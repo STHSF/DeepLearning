@@ -1,3 +1,4 @@
+# coding=utf-8
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 
@@ -18,8 +19,10 @@ n_hidden_units = 128   # neurons in hidden layer
 n_classes = 10      # MNIST classes (0-9 digits)
 
 # tf Graph input
-x = tf.placeholder(tf.float32, [None, n_steps, n_inputs])
-y = tf.placeholder(tf.float32, [None, n_classes])
+with tf.name_scope("input_data"):
+    x = tf.placeholder(tf.float32, [None, n_steps, n_inputs])
+with tf.name_scope("labels"):
+    y = tf.placeholder(tf.float32, [None, n_classes])
 
 # Define weights_1
 weights = {
@@ -42,13 +45,14 @@ def rnn(input_data, weights, biases):
     ########################################
 
     # transpose the inputs shape from
-    # X ==> (128 batch * 28 steps, 28 inputs)
+    # X（128 batch ,28 steps, 18 inputs）
+    # ==> (128 batch * 28 steps, 28 inputs)
     input_data = tf.reshape(input_data, [-1, n_inputs])
 
     # into hidden
     # data_in = (128 batch * 28 steps, 128 hidden)
     data_in = tf.matmul(input_data, weights['in']) + biases['in']
-    # data_in ==> (128 batch, 28 steps, 128 hidden)
+    # data_in ==> (128 batch, 28 steps, 128 hidden_units)
     data_in = tf.reshape(data_in, [-1, n_steps, n_hidden_units])
 
     # cell

@@ -8,10 +8,14 @@ from six.moves import range
 def accuracy(predictions, labels):
     return 100.0 * np.sum(np.argmax(predictions, 1) == np.argmax(labels, 1)) / predictions.shape[0]
 
+
 # read_data
 pickle_file = 'notMNIST.pickle'
 
 with open(pickle_file, 'rb') as f:
+    """
+    import data_sets
+    """
     save = pickle.load(f)
     train_dataset = save['train_dataset']
     train_labels = save['train_labels']
@@ -20,45 +24,68 @@ with open(pickle_file, 'rb') as f:
     test_dataset = save['test_dataset']
     test_labels = save['test_labels']
     del save
-    print train_dataset.shape, train_labels.shape
-    print valid_dataset.shape, valid_labels.shape
-    print test_dataset.shape, test_labels.shape
-
+    print "pre_train_dataset", train_dataset.shape, train_labels.shape
+    print "pre_valid_dataset", valid_dataset.shape, valid_labels.shape
+    print "pre_test_dataset", test_dataset.shape, test_labels.shape
+# image size（28 * 28）
 image_size = 28
+# the numbers of labels
 num_labels = 10
 
 
 def data_format(input_data, labels):
-    data = input_data.reshape([-1, image_size*image_size]).astype(np.float32)
+    """
+    reshape data_sets. convert the matrix to a vector, [(28, 28)] ==> [(1, 28*28)]
+    reshape labels. convert the label to one-hot code,  0 ==> [1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    :param input_data:
+    :param labels:
+    :return:
+    """
+    data = input_data.reshape([-1, image_size * image_size]).astype(np.float32)
     labels = (np.arange(num_labels) == labels[:, None]).astype(np.float32)
     return data, labels
+
 
 train_dataset, train_labels = data_format(train_dataset, train_labels)
 valid_dataset, valid_labels = data_format(valid_dataset, valid_labels)
 test_dataset, test_labels = data_format(test_dataset, test_labels)
-print train_dataset.shape, train_labels.shape
-print valid_dataset.shape, valid_labels.shape
-print test_dataset.shape, test_labels.shape
+print "train_dataset", train_dataset.shape, train_labels.shape
+print "valid_dataset", valid_dataset.shape, valid_labels.shape
+print "test_dataset", test_dataset.shape, test_labels.shape
 
+# setting hidden units
 hidden_units = 1024
+# setting batch size
 batch_size = 128
 
 graph = tf.Graph()
 with graph.as_default():
-
+    # we designed two layers for this neural network, so we have two weights and biases
     with tf.name_scope('weight'):
         weight = {
-            "w1": tf.Variable(tf.truncated_normal([image_size*image_size, hidden_units])),
-            "w2": tf.Variable(tf.truncated_normal([hidden_units, num_labels]))
+            # the weights of first layer
+            "w1": tf.Variable(tf.truncated_normal([image_size * image_size, hidden_units]), name="weight1"),
+            # the weights of second layer
+            "w2": tf.Variable(tf.truncated_normal([hidden_units, num_labels]), name="weight2")
         }
-    with tf.name_scope('baies'):
-        baies = {
-            "b1": tf.Variable(tf.zeros([hidden_units])),
-            "b2": tf.Variable(tf.zeros([num_labels]))
+
+    with tf.name_scope('biases'):
+        biases = {
+            # the biases of first layer
+            "b1": tf.Variable(tf.zeros([hidden_units]), name="biases1"),
+            # the biases of second layer
+            "b2": tf.Variable(tf.zeros([num_labels]), name="biases2")
         }
 
 
     def multi_layers(input_data, weight, baies):
+        """
+
+        :param input_data:
+        :param weight:
+        :param baies:
+        :return:
+        """
         with tf.name_scope('layer_1'):
             logits_1 = tf.matmul(input_data, weight['w1']) + baies['b1']
         with tf.name_scope('relu'):
@@ -68,7 +95,9 @@ with graph.as_default():
 
         return logits_2
 
+
     with tf.name_scope('input_data'):
+        # create placeholder for train, valid, test datasets
         with tf.name_scope('train_data'):
             tf_train_data = tf.placeholder(tf.float32, shape=(batch_size, image_size * image_size))
         with tf.name_scope('train_labels'):
@@ -79,7 +108,7 @@ with graph.as_default():
             tf_test_data = tf.constant(test_dataset)
 
     with tf.name_scope('loss'):
-        predict = multi_layers(tf_train_data, weight, baies)
+        predict = multi_layers(tf_train_data, weight, biases)
         loss = tf.reduce_mean(
             tf.nn.softmax_cross_entropy_with_logits(labels=tf_train_labels, logits=predict, name='loss'))
 
@@ -89,16 +118,17 @@ with graph.as_default():
     with tf.name_scope('train_prediction'):
         train_prediction = tf.nn.softmax(predict)
     with tf.name_scope('valid_prediction'):
-        valid_predict = multi_layers(valid_dataset, weight, baies)
+        valid_predict = multi_layers(valid_dataset, weight, biases)
         valid_prediction = tf.nn.softmax(valid_predict)
     with tf.name_scope('test_prediction'):
-        test_predict = multi_layers(test_dataset, weight, baies)
+        test_predict = multi_layers(test_dataset, weight, biases)
         test_prediction = tf.nn.softmax(test_predict)
 
 num_steps = 3001
 
 with tf.Session(graph=graph) as session:
     tf.global_variables_initializer().run()
+    # use command "tensorboard --logdir='/logss'" to show the tensor graph
     writer = tf.summary.FileWriter("logss/", session.graph)
     saver = tf.train.Saver()
 
@@ -125,4 +155,4 @@ with tf.Session(graph=graph) as session:
     print("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(), test_labels))
 
     # 模型保存
-    saver.save(session, '/model')
+    # saver.save(session, '/model')

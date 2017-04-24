@@ -80,7 +80,7 @@ with graph.as_default():
 
     def multi_layers(input_data, weight, baies):
         """
-
+        add hidden layers -- the nonlinear transformation
         :param input_data:
         :param weight:
         :param baies:
@@ -89,6 +89,7 @@ with graph.as_default():
         with tf.name_scope('layer_1'):
             logits_1 = tf.matmul(input_data, weight['w1']) + baies['b1']
         with tf.name_scope('relu'):
+            # hidden layer
             hidden_layer = tf.nn.relu(logits_1, name='hidden_layer')
         with tf.name_scope('layer_2'):
             logits_2 = tf.matmul(hidden_layer, weight['w2']) + baies['b2']
@@ -108,6 +109,7 @@ with graph.as_default():
             tf_test_data = tf.constant(test_dataset)
 
     with tf.name_scope('loss'):
+        # loss function
         predict = multi_layers(tf_train_data, weight, biases)
         loss = tf.reduce_mean(
             tf.nn.softmax_cross_entropy_with_logits(labels=tf_train_labels, logits=predict, name='loss'))

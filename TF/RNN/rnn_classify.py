@@ -101,8 +101,8 @@ with tf.Session() as sess:
     while step * batch_size < training_iters:
         batch_xs, batch_ys = mnist.train.next_batch(batch_size)
         batch_xs = batch_xs.reshape([batch_size, n_steps, n_inputs])
-        print batch_xs.shape
-        print batch_ys.shape
+        print(batch_xs.shape)
+        print(batch_ys.shape)
         sess.run([train], feed_dict={x: batch_xs, y: batch_ys, })
         # if step % 20 == 0:
         #     print(sess.run(accuracy, feed_dict={x: batch_xs, y: batch_ys, }))

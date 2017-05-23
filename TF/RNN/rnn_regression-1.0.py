@@ -73,8 +73,11 @@ class lstm(object):
         lstm_cell = tf.contrib.rnn.BasicLSTMCell(self.cell_size, forget_bias=1.0, state_is_tuple=True)
 
         with tf.name_scope('initial_state'):
+            # self.cell_init_state = lstm_cell.zero_state(self.batch_size, dtype=tf.float32)
             self.cell_init_state = lstm_cell.zero_state(self.batch_size, dtype=tf.float32)
 
+        # self.cell_outputs, self.cell_final_state = tf.nn.dynamic_rnn(
+        #     lstm_cell, self.l_in_y, initial_state=self.cell_init_state, time_major=False)
         self.cell_outputs, self.cell_final_state = tf.nn.dynamic_rnn(
             lstm_cell, self.l_in_y, initial_state=self.cell_init_state, time_major=False)
 
@@ -93,7 +96,7 @@ class lstm(object):
 
     def compute_cost(self):
 
-        losses = tf.nn.seq2seq.sequence_loss_by_example(
+        losses = tf.contrib.legacy_seq2seq.sequence_loss_by_example(
             [tf.reshape(self.pred, [-1], name='reshape_pred')],
             [tf.reshape(self.ys, [-1], name='reshape_target')],
             [tf.ones([self.batch_size * self.n_steps], dtype=tf.float32)],
@@ -107,11 +110,11 @@ class lstm(object):
                 tf.reduce_sum(losses, name='losses_sum'),
                 self.batch_size,
                 name='average_cost')
-            tf.scalar_summary('cost', self.cost)
+            tf.summary.scalar('cost', self.cost)
 
     def ms_error(self, y_pre, y_target):
 
-        return tf.square(tf.sub(y_pre, y_target))
+        return tf.square(tf.subtract(y_pre, y_target))
 
     def _weight_variable(self, shape, name='weights_1'):
 
@@ -130,8 +133,8 @@ if __name__ == '__main__':
 
     model = lstm(TIME_STEPS, INPUT_SIZE, OUTPUT_SIZE, CELL_SIZE, BATCH_SIZE)
     sess = tf.Session()
-    merged = tf.merge_all_summaries()
-    writer = tf.train.SummaryWriter("logs", sess.graph)
+    merged = tf.summary.merge_all()
+    writer = tf.summary.FileWriter("logs", sess.graph)
     sess.run(tf.initialize_all_variables())
     # relocate to the local dir and run this line to view it on Chrome (http://0.0.0.0:6006/):
     # $ tensorboard --logdir='logs'

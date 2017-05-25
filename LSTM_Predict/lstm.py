@@ -14,11 +14,19 @@ warnings.filterwarnings("ignore")  # Hide messy Numpy warnings
 
 
 def load_data(filename, seq_len, normalise_window):
+    """
+
+    :param filename:
+    :param seq_len:
+    :param normalise_window:
+    :return:
+    """
     f = open(filename, 'rb').read()
     data = f.decode().split('\n')
 
     sequence_length = seq_len + 1
     result = []
+    # 将序列数据按照seq_len截取，并组合成一个list
     for index in range(len(data) - sequence_length):
         result.append(data[index: index + sequence_length])
 
@@ -26,10 +34,12 @@ def load_data(filename, seq_len, normalise_window):
         result = normalise_windows(result)
 
     result = np.array(result)
-
+    # 计算组合数据的行数，并按0.9将数据分开
     row = round(0.9 * result.shape[0])
     train = result[:int(row), :]
+    # 随机打乱list中的元素
     np.random.shuffle(train)
+    # 将序列的最后一个值作为标签，其他值作为训练输入
     x_train = train[:, :-1]
     y_train = train[:, -1]
     x_test = result[int(row):, :-1]
@@ -42,11 +52,18 @@ def load_data(filename, seq_len, normalise_window):
 
 
 def normalise_windows(window_data):
+    """
+    数据归一化
+    :param window_data:
+    :return:
+    """
     normalised_data = []
     for window in window_data:
         normalised_window = [((float(p) / float(window[0])) - 1) for p in window]
         normalised_data.append(normalised_window)
     return normalised_data
+
+
 
 
 def build_model(layers):

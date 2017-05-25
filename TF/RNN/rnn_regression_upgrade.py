@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 
 
 BATCH_START = 0
-TIME_STEPS = 20
+NUM_STEPS = 20
 BATCH_SIZE = 50
 INPUT_SIZE = 1
 OUTPUT_SIZE = 1
@@ -16,7 +16,7 @@ LR = 0.006
 
 def get_batch():
     # 生成数据
-    global BATCH_START, TIME_STEPS
+    global BATCH_START, NUM_STEPS
     # xs shape (50batch, 20steps)
     xs = np.arange(BATCH_START, BATCH_START+TIME_STEPS*BATCH_SIZE).reshape((BATCH_SIZE, TIME_STEPS)) / (10*np.pi)
     seq = np.sin(xs)
@@ -53,17 +53,17 @@ class LSTMRNN(object):
 
         l_in_x = tf.reshape(self.xs, [-1, self.input_size], name='2_2D')  # (batch*n_step, in_size)
 
-        # Ws (in_size, cell_size)
+        # Ws (in_size, HIDDEN_SIZE)
         Ws_in = self._weight_variable([self.input_size, self.cell_size])
 
-        # bs (cell_size, )
+        # bs (HIDDEN_SIZE, )
         bs_in = self._bias_variable([self.cell_size,])
 
-        # l_in_y = (batch * n_steps, cell_size)
+        # l_in_y = (batch * time_steps, HIDDEN_SIZE)
         with tf.name_scope('Wx_plus_b'):
             l_in_y = tf.matmul(l_in_x, Ws_in) + bs_in
 
-        # reshape l_in_y ==> (batch, n_steps, cell_size)
+        # reshape l_in_y ==> (batch, time_steps, HIDDEN_SIZE)
         self.l_in_y = tf.reshape(l_in_y, [-1, self.n_steps, self.cell_size], name='2_3D')
 
     def add_cell(self):
@@ -71,7 +71,7 @@ class LSTMRNN(object):
         lstm_cell = tf.contrib.rnn.BasicLstmCell(self.cell_size, forget_bias=1.0, state_is_tuple=True)
 
 
-        # lstm_cell = tf.nn.rnn_cell.BasicLSTMCell(self.cell_size, forget_bias=1.0, state_is_tuple=True)
+        # lstm_cell = tf.nn.rnn_cell.BasicLSTMCell(self.HIDDEN_SIZE, forget_bias=1.0, state_is_tuple=True)
 
         with tf.name_scope('initial_state'):
             self.cell_init_state = lstm_cell.zero_state(self.batch_size, dtype=tf.float32)
@@ -81,7 +81,7 @@ class LSTMRNN(object):
 
     def add_output_layer(self):
 
-        # shape = (batch * steps, cell_size)
+        # shape = (batch * steps, HIDDEN_SIZE)
         l_out_x = tf.reshape(self.cell_outputs, [-1, self.cell_size], name='2_2D')
 
         Ws_out = self._weight_variable([self.cell_size, self.output_size])
@@ -129,7 +129,7 @@ class LSTMRNN(object):
 
 if __name__ == '__main__':
 
-    model = LSTMRNN(TIME_STEPS, INPUT_SIZE, OUTPUT_SIZE, CELL_SIZE, BATCH_SIZE)
+    model = LSTMRNN(NUM_STEPS, INPUT_SIZE, OUTPUT_SIZE, CELL_SIZE, BATCH_SIZE)
     sess = tf.Session()
     merged = tf.summary.merge_all()
     writer = tf.summary.FileWriter("logs", sess.graph)
@@ -159,7 +159,7 @@ if __name__ == '__main__':
             feed_dict=feed_dict)
 
         # plotting
-        # plt.plot(xs[0, :], res[0].flatten(), 'r', xs[0, :], pred.flatten()[:TIME_STEPS], 'b--')
+        # plt.plot(xs[0, :], res[0].flatten(), 'r', xs[0, :], pred.flatten()[:NUM_STEPS], 'b--')
         # plt.ylim((-1.2, 1.2))
         # plt.draw()
         # plt.pause(0.3)

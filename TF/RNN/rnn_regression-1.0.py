@@ -77,19 +77,17 @@ class lstm_model(object):
         # reshape l_in_y ==> (batch, time_steps, HIDDEN_SIZE)
         self.l_in_y = tf.reshape(l_in_y, [-1, self.num_steps, self.HIDDEN_SIZE], name='2_3D')
 
+    def rnn_cell(self):
+        # Or GRUCell, LSTMCell(args.hiddenSize)
+        lstm_cell = tf.contrib.rnn.BasicLSTMCell(self.HIDDEN_SIZE, state_is_tuple=True)
+        if not self.is_training:
+            lstm_cell = tf.contrib.rnn.DropoutWrapper(lstm_cell, input_keep_prob=1.0,
+                                                         output_keep_prob=KEEP_PROB)
+        return lstm_cell
+
     def add_cell(self):
-
         # lstm_cell = tf.contrib.rnn.BasicLSTMCell(self.HIDDEN_SIZE, forget_bias=1.0, state_is_tuple=True)
-
-        def build_rnn_cell():
-            # Or GRUCell, LSTMCell(args.hiddenSize)
-            encoDecoCell = tf.contrib.rnn.BasicLSTMCell(self.HIDDEN_SIZE, state_is_tuple=True)
-            if not self.is_training:
-                encoDecoCell = tf.contrib.rnn.DropoutWrapper(encoDecoCell, input_keep_prob=1.0,
-                                                             output_keep_prob=KEEP_PROB)
-            return encoDecoCell
-
-        lstm_cell = tf.contrib.rnn.MultiRNNCell([build_rnn_cell() for _ in range(NUM_LAYERS)], state_is_tuple=True)
+        lstm_cell = tf.contrib.rnn.MultiRNNCell([self.rnn_cell() for _ in range(NUM_LAYERS)], state_is_tuple=True)
 
         with tf.name_scope('initial_state'):
             # 初始化最初的状态
@@ -162,9 +160,9 @@ if __name__ == '__main__':
         seq, res, xs = get_batch()
         if i == 0:
             feed_dict = {
-                    model.xs: seq,
-                    model.ys: res,
-                    # create initial state
+                model.xs: seq,
+                model.ys: res,
+                # create initial state
             }
         else:
             feed_dict = {

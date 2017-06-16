@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 
 
 BATCH_START = 0
-NUM_STEPS = 20
+TIME_STEPS = 20
 BATCH_SIZE = 50
 INPUT_SIZE = 1
 OUTPUT_SIZE = 1

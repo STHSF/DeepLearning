@@ -47,13 +47,13 @@ def get_batch():
 class lstm_model(object):
     def __init__(self, num_steps, input_size, output_size, cell_size, batch_size, is_training):
         """
-        :param num_steps: 每批数据总包含多少时间刻度
+        :param num_steps: 每批数据总包含多少时间刻度(序列长度)
         :param input_size: 输入数据的维度
         :param output_size: 输出数据的维度 如果是类似价格曲线的话，应该为1
         :param cell_size: cell的大小
         :param batch_size: 每批次训练数据的数量
         """
-        self.num_steps = num_steps   # 读取长度为n_steps的子序列
+        self.num_steps = num_steps   # 读取长度为num_steps的子序列
         self.input_size = input_size
         self.output_size = output_size
         self.HIDDEN_SIZE = cell_size

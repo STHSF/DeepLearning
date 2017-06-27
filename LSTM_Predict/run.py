@@ -40,18 +40,21 @@ if __name__ == '__main__':
 
     print('> Loading data... ')
 
-    X_train, y_train, X_test, y_test = lstm.load_data('sp500.csv', timesteps, True)
+    X_train, y_train, X_test, y_test = lstm.load_data('sp500.csv', timesteps, normalise_window=True)
 
     print(np.shape(X_train))
-    print(np.shape(np.array(y_train, dtype=np.float32)))
-    print(np.shape(X_test))
-    print(np.shape(y_test))
+    print('X_train.shape\n', np.shape(X_train))
+    # print('X_train\n', X_train)
+    print('y_train.shape\n', np.shape(np.array(y_train, dtype=np.float32)))
+    print('X_test.shape\n', np.shape(X_test))
+    print('y_test.shape\n', np.shape(y_test))
+    print('y_test:\n', y_test[0])
 
     print('> Data Loaded. Compiling...')
 
     # layers = [input_dim, input_length, hidden_units, output_dim]
     model = lstm.build_model([1, 50, 100, 1])
-
+    #
     model.fit(
         X_train,
         y_train,
@@ -59,10 +62,10 @@ if __name__ == '__main__':
         epochs=epochs,
         validation_split=0.05)
 
-    # predictions = lstm.predict_sequences_multiple(model, X_test, timesteps, 50)
-    # predictions = lstm.predict_sequence_full(model, X_test, timesteps)
-    predictions = lstm.predict_point_by_point(model, X_test)
-
-    print('Training duration (s) : ', time.time() - global_start_time)
-    # plot_results_multiple(predictions, y_test, 50)
-    plot_results(predictions, y_test)
+    # # predictions = lstm.predict_sequences_multiple(model, X_test, timesteps, 50)
+    # # predictions = lstm.predict_sequence_full(model, X_test, timesteps)
+    # predictions = lstm.predict_point_by_point(model, X_test)
+    #
+    # print('Training duration (s) : ', time.time() - global_start_time)
+    # # plot_results_multiple(predictions, y_test, 50)
+    # plot_results(predictions, y_test)

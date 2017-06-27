@@ -5,7 +5,6 @@ import time
 import warnings
 import numpy as np
 from numpy import newaxis
-import tensorflow as tf
 from keras.layers.core import Dense, Activation, Dropout
 from keras.layers.recurrent import LSTM
 from keras.models import Sequential
@@ -28,12 +27,13 @@ def load_data(filename, seq_len, normalise_window):
     for index in range(len(data) - sequence_length):
         result.append(data[index: index + sequence_length])
 
-    print('result.shape:\n', np.shape(result))
-
     if normalise_window:
         result = normalise_windows(result)
 
     result = np.array(result)
+    print('result.shape:\n', np.shape(result))
+    # print('result:\n', result)
+
     # 计算组合数据的行数，并按0.9将数据分开
     row = round(0.9 * result.shape[0])
     train = result[:int(row), :]
@@ -41,10 +41,12 @@ def load_data(filename, seq_len, normalise_window):
     np.random.shuffle(train)
     # 将序列的最后一个值作为标签，其他值作为训练输入
     x_train = train[:, :-1]
+    print('x_train.shape\n', np.shape(x_train))
+    # print('x_train:\n', x_train)
     y_train = train[:, -1]
     x_test = result[int(row):, :-1]
     y_test = result[int(row):, -1]
-    # 将数据转化成lstm的数据格式[batch_size, timesteps, input_dim], input_dim是输入数据的维度，在这是输入数据的维度是1,可以理解为特征数目。
+    # 将数据转化成lstm的数据格式[samples, timesteps, input_dim], input_dim是输入数据的维度，在这是输入数据的维度是1,可以理解为特征数目。
     x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
     x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1))
 
@@ -65,12 +67,14 @@ def normalise_windows(window_data):
 
 
 def build_model(layers):
+    # 建立keras序贯模型
     model = Sequential()
 
-    model.add(LSTM(512, input_dim=layers[0], input_length=layers[1], return_sequences=True))
+    model.add(LSTM(units=layers[2], input_dim=layers[0], input_length=layers[1], return_sequences=True))
+    # model.add(LSTM(output_dim=layers[2], input_dim=layers[0], input_length=layers[1], return_sequences=True))
     model.add(Dropout(0.2))
     # 添加隐藏层
-    model.add(LSTM(layers[2], return_sequences=False))
+    model.add(LSTM(units=layers[2], return_sequences=False))
     model.add(Dropout(0.2))
 
     model.add(Dense(output_dim=layers[3]))

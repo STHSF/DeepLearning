@@ -62,10 +62,10 @@ if __name__ == '__main__':
         epochs=epochs,
         validation_split=0.05)
 
-    # # predictions = lstm.predict_sequences_multiple(model, X_test, timesteps, 50)
-    # # predictions = lstm.predict_sequence_full(model, X_test, timesteps)
+    predictions = lstm.predict_sequences_multiple(model, X_test, timesteps, 50)
+    # predictions = lstm.predict_sequence_full(model, X_test, timesteps)
     # predictions = lstm.predict_point_by_point(model, X_test)
-    #
-    # print('Training duration (s) : ', time.time() - global_start_time)
-    # # plot_results_multiple(predictions, y_test, 50)
+
+    print('Training duration (s) : ', time.time() - global_start_time)
+    plot_results_multiple(predictions, y_test, 50)
     # plot_results(predictions, y_test)

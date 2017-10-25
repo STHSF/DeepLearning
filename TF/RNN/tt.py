@@ -38,11 +38,11 @@ def get_batch():
     # np.newaxis 用来增加一个维度 变为三个维度，第三个维度将用来存上一批样本的状态
     return [seq[:, :, np.newaxis], res[:, :, np.newaxis], xs]
 
-[s, res, xs] = get_batch()
+[seq, res, xs] = get_batch()
 
-print(np.shape(s))
-print(np.shape(res))
-print(np.shape(xs))
+print('seq.shape',np.shape(seq))
+print('res.shape',np.shape(res))
+print('xs.shape',np.shape(xs))
 
-print('res\n', res)
-print('xs\n', xs)
+# print('res\n', res)
+# print('xs\n', xs)

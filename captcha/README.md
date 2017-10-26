@@ -24,3 +24,11 @@ python TensorFlow_cnn_test_model.py
 
 新版说明：
 加注释
+
+#### 参考文献
+
+[1](https://zhuanlan.zhihu.com/p/26078299)
+[2](https://zhuanlan.zhihu.com/p/25779608)
+[3](https://zhuanlan.zhihu.com/p/25779608?group_id=825335754321457152)
+[4](http://www.jianshu.com/p/26ff7b9075a1?from=timeline)
+[]()

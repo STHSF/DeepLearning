@@ -30,9 +30,6 @@ with tf.Graph().as_default():
         matricized_unary_scores = tf.matmul(matricized_x_t, weights)
         unary_scores = tf.reshape(matricized_unary_scores,
                                   [num_examples, num_words, num_tags])
-        print('size of unary_scores', np.shape(unary_scores))
-        print('size of y_t', np.shape(y_t))
-        print('size of sequence_lengths_t', np.shape(sequence_lengths_t))
 
         # Compute the log-likelihood of the gold sequences and keep the transition
         # params for inference at test time.
@@ -64,7 +61,5 @@ with tf.Graph().as_default():
                     # Evaluate word-level accuracy.
                     correct_labels += np.sum(np.equal(viterbi_sequence, y_))
                     total_labels += sequence_length_
-                    print(y_)
-                    print(viterbi_sequence)
                 accuracy = 100.0 * correct_labels / float(total_labels)
                 print("Accuracy: %.2f%%" % accuracy)

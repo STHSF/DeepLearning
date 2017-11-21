@@ -1,20 +1,23 @@
 import tensorflow as tf
 
-with tf.name_scope("name_scope"):
-    v1 = tf.get_variable("var1", [1], dtype=tf.float32)
-    v2 = tf.Variable(1, name="var2", dtype=tf.float32)
-    a = tf.add(v1, v2, name="adds")
+k = tf.placeholder(tf.float32)
 
-print(v1.name)
-print(v2.name)
-print(a.name)
+# Make a normal distribution, with a shifting mean
+mean_moving_normal = tf.random_normal(shape=[1000], mean=(5*k), stddev=1)
+# Record that distribution into a histogram summary
+tf.summary.histogram("normal/moving_mean", mean_moving_normal)
 
-with tf.variable_scope("variable_scope"):
-    v1 = tf.get_variable("var1", [1], dtype=tf.float32)
-    v2 = tf.Variable(1, name="var2", dtype=tf.float32)
-    a = tf.add(v1, v2, name="adds")
+# Setup a session and summary writer
+sess = tf.Session()
+writer = tf.summary.FileWriter("/tmp/histogram_example", sess.graph)
 
-print(v1.name)
-print(v2.name)
-print(a.name)
+summaries = tf.summary.merge_all()
 
+# sess.run(tf.global_variables_initializer())
+
+# Setup a loop and write the summaries to disk
+N = 400
+for step in range(N):
+    k_val = step/float(N)
+    summ = sess.run(summaries, feed_dict={k: k_val})
+    # writer.add_summary(summ, global_step=step)

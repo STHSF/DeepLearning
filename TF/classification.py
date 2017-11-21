@@ -65,6 +65,12 @@ sess.run(tf.initialize_all_variables())
 for i in range(2000):
 
     batch_xs, batch_ys = mnist_data.train.next_batch(100)
+    print "batch_xs.shape"
+    print batch_xs.shape
+    print "batch_ys.shape"
+    print batch_ys.shape
+
+
     sess.run(train, feed_dict={xs: batch_xs, ys: batch_ys})
 
     if i % 10 == 0:

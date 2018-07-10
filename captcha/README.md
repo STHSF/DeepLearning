@@ -1,17 +1,17 @@
 
-使用TensorFlow去训练自己生成的验证码，
+使用TensorFlow去训练识别自己生成的验证码，
 TensorFlow版本：
-0.12  version：1.00
+1.8.0 version：1.00
 
 
 当前进度：
 
 1：验证码自动生成---完成
-使用命令 python gen_captcha.py 即可在同目录下生成验证码图片，，用于测试，同时被TensorFlow_cnn调用
+使用命令 python gen_captcha.py 即可在同目录下生成验证码图片，用于测试，同时被model_train.py调用
 
 
 2：进行训练 ：
-python TensorFlow_cnn.py
+python model_train.py
 当前程序设定一个成功率0.5或者0.7
 我设置为当训练达到0.7 准确性就停止并且保留其模型。。
 大概训练到 5k多次就能达到这个准确度。
@@ -19,7 +19,7 @@ python TensorFlow_cnn.py
 
 3：测试：
 完成训练后，自己测试模型准确度
-python TensorFlow_cnn_test_model.py
+python model_predict.py
 
 
 新版说明：
@@ -28,7 +28,11 @@ python TensorFlow_cnn_test_model.py
 #### 参考文献
 
 [1](https://zhuanlan.zhihu.com/p/26078299)
+
 [2](https://zhuanlan.zhihu.com/p/25779608)
+
 [3](https://zhuanlan.zhihu.com/p/25779608?group_id=825335754321457152)
+
 [4](http://www.jianshu.com/p/26ff7b9075a1?from=timeline)
+
 []()

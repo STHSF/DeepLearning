@@ -106,13 +106,14 @@ class model:
         # # or
         # unpack to list [(batch, outputs)..] * steps
         outputs = tf.unstack(tf.transpose(outputs, [1, 0, 2]))  # states is the last outputs
-        results = tf.matmul(outputs[-1], weights['out']) + biases['out']
+        logits = tf.matmul(outputs[-1], weights['out']) + biases['out']
 
-        return results
+        return logits
 
 
 class conf(object):
     init_scale = 0.04
+
     # hyperparameters
     lr = 0.001
     training_iters = 100000
@@ -127,7 +128,7 @@ train_conf = conf()
 valid_conf = conf()
 valid_conf.batch_size = 20
 valid_conf.training_iters = 2000
-# valid_conf.num_steps = 1
+valid_conf.num_steps = 1
 
 
 def run_epoch(_model, session, _conf):

@@ -1,19 +1,27 @@
-# coding:utf-8
-from gen_captcha import gen_captcha_text_and_image
-from gen_captcha import number
-from gen_captcha import alphabet
-from gen_captcha import ALPHABET
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+@version: ??
+@author: li
+@file: model_train.py
+@time: 2018/7/4 下午5:16
+"""
+
+from gen_captcha import gen_captcha_text_and_image, number, alphabet, ALPHABET
 
 import numpy as np
 import tensorflow as tf
 
-text, image = gen_captcha_text_and_image()  # 先检验生成验证码和文字测试模块是否完全
-print("验证码图像channel: {}".format(image.shape))  # (60, 160, 3)
+
+text, _image = gen_captcha_text_and_image()  # 先检验生成验证码和文字测试模块是否完全
+print("验证码图像channel: {}".format(_image.shape))  # (50, 200, 3)
 # 图像大小
-IMAGE_HEIGHT = 60
-IMAGE_WIDTH = 160
+IMAGE_HEIGHT = 50
+IMAGE_WIDTH = 200
 MAX_CAPTCHA = len(text)
-print("验证码文本最长字符数{}", MAX_CAPTCHA)  # 验证码最长4字符; 我全部固定为4,可以不固定. 如果验证码长度小于4，用'_'补齐
+# MAX_CAPTCHA = 4
+print("验证码文本最长字符数: %s" % MAX_CAPTCHA)  # 验证码最长4字符; 我全部固定为4,可以不固定. 如果验证码长度小于4，用'_'补齐
 
 
 # 把彩色图像转为灰度图像（色彩对识别验证码没有什么用）
@@ -28,38 +36,41 @@ def convert2gray(img):
         return img
 
 
-"""
-cnn在图像大小是2的倍数时性能最高, 如果你用的图像大小不是2的倍数，可以在图像边缘补无用像素。
-np.pad(image【,((2,3),(2,2)), 'constant', constant_values=(255,))  # 在图像上补2行，下补3行，左补2行，右补2行
-"""
-
 # 文本转向量
-char_set = number + alphabet + ALPHABET + ['_']  # 如果验证码长度小于4, '_'用来补齐
+char_set = number + ['_']  # 如果验证码长度小于4, '_'用来补齐
 CHAR_SET_LEN = len(char_set)
+print('CHAR_SET_LEN: {}'.format(CHAR_SET_LEN))
 
 
 def text2vec(text):
+    # 总共52个字母加10个数字，还有一个下划线，总共63个字符
     text_len = len(text)
     if text_len > MAX_CAPTCHA:
         raise ValueError('验证码最长4个字符')
-
+    # vector: (252,)
     vector = np.zeros(MAX_CAPTCHA * CHAR_SET_LEN)
 
-    def char2pos(c):
-        if c == '_':
-            k = 62
+    def char2pos(_char):
+        """
+        将字符转化成序号
+        :param _char:
+        :return:
+        """
+        if _char == '_':
+            k = 10   # 只有数字的情况下，下划线排在第十一个
             return k
-        k = ord(c) - 48
-        if k > 9:
-            k = ord(c) - 55
-            if k > 35:
-                k = ord(c) - 61
-                if k > 61:
-                    raise ValueError('No Map')
+        # 字符编码
+        # 如果c为数字
+        k = ord(_char) - 48
+        if k > 10 or k < 0:  # 如果c为非数字和下划线
+            raise ValueError('No Map')
+        print('k: %s' % k)
         return k
-
+    # 遍历验证码的每一个字符
     for i, c in enumerate(text):
+        print(i, c)
         idx = i * CHAR_SET_LEN + char2pos(c)
+        print('idx: %s'% idx)
         vector[idx] = 1
     return vector
 
@@ -73,11 +84,11 @@ def vec2text(vec):
         char_idx = c % CHAR_SET_LEN
         if char_idx < 10:
             char_code = char_idx + ord('0')
-        elif char_idx < 36:
-            char_code = char_idx - 10 + ord('A')
-        elif char_idx < 62:
-            char_code = char_idx - 36 + ord('a')
-        elif char_idx == 62:
+        # elif char_idx < 36:
+        #     char_code = char_idx - 10 + ord('A')
+        # elif char_idx < 62:
+        #     char_code = char_idx - 36 + ord('a')
+        elif char_idx == 10:
             char_code = ord('_')
         else:
             raise ValueError('error')
@@ -85,38 +96,32 @@ def vec2text(vec):
     return "".join(text)
 
 
-"""
-#向量（大小MAX_CAPTCHA*CHAR_SET_LEN）用0,1编码 每63个编码一个字符，这样顺利有，字符也有
-vec = text2vec("F5Sd")
-text = vec2text(vec)
-print(text)  # F5Sd
-vec = text2vec("SFd5")
-text = vec2text(vec)
-print(text)  # SFd5
-"""
+# 向量（大小MAX_CAPTCHA*CHAR_SET_LEN）用0,1编码 每11个编码一个字符，这样数字有，字符也有
+
+# vec = text2vec("352_")
+# print(np.shape(vec))
+# print(vec)
+# text = vec2text(vec)
+# print(text)  # 352_
 
 
-# 生成一个训练batch
 def get_next_batch(batch_size=128):
     batch_x = np.zeros([batch_size, IMAGE_HEIGHT * IMAGE_WIDTH])
     batch_y = np.zeros([batch_size, MAX_CAPTCHA * CHAR_SET_LEN])
 
-    # 有时生成图像大小不是(60, 160, 3)
     def wrap_gen_captcha_text_and_image():
-        ''' 获取一张图，判断其是否符合（60，160，3）的规格'''
         while True:
-            text, image = gen_captcha_text_and_image()
-            if image.shape == (50, 200, 3):  # 此部分应该与开头部分图片宽高吻合
-                return text, image
+            text, _image = gen_captcha_text_and_image()
+            if _image.shape == (IMAGE_HEIGHT, IMAGE_WIDTH, 3):
+                return text, _image
 
     for i in range(batch_size):
-        text, image = wrap_gen_captcha_text_and_image()
-        image = convert2gray(image)
+        text, _image = wrap_gen_captcha_text_and_image()
+        image = convert2gray(_image)
 
-        # 将图片数组一维化 同时将文本也对应在两个二维组的同一行
-        batch_x[i, :] = image.flatten() / 255  # (image.flatten()-128)/128  mean为0
+        batch_x[i, :] = image.flatten() / 255
         batch_y[i, :] = text2vec(text)
-    # 返回该训练批次
+
     return batch_x, batch_y
 
 
@@ -129,8 +134,8 @@ keep_prob = tf.placeholder(tf.float32)  # dropout
 
 # 定义CNN
 def crack_captcha_cnn(w_alpha=0.01, b_alpha=0.1):
-    # 将占位符 转换为 按照图片给的新样式
-    x = tf.reshape(X, shape=[-1, IMAGE_HEIGHT, IMAGE_WIDTH, 1])
+    x = tf.reshape(X, shape=[-1, IMAGE_HEIGHT, IMAGE_WIDTH, 1])  # (?, 50, 200, 1)
+    print('shape_of_x: %s' % x.get_shape())
 
     # w_c1_alpha = np.sqrt(2.0/(IMAGE_HEIGHT*IMAGE_WIDTH)) #
     # w_c2_alpha = np.sqrt(2.0/(3*3*32))
@@ -138,35 +143,46 @@ def crack_captcha_cnn(w_alpha=0.01, b_alpha=0.1):
     # w_d1_alpha = np.sqrt(2.0/(8*32*64))
     # out_alpha = np.sqrt(2.0/1024)
 
-    # 3 conv layer
-    w_c1 = tf.Variable(w_alpha * tf.random_normal([3, 3, 1, 32]))  # 从正太分布输出随机值
+    # 3 conv layer # 3 个 转换层
+    w_c1 = tf.Variable(w_alpha * tf.random_normal([3, 3, 1, 32]))
     b_c1 = tf.Variable(b_alpha * tf.random_normal([32]))
-    conv1 = tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(x, w_c1, strides=[1, 1, 1, 1], padding='SAME'), b_c1))
+    conv1 = tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(x, w_c1, strides=[1, 1, 1, 1], padding='SAME'), b_c1))  # (?, 50, 200, 32)
+    print('shape_of_conv1: %s' % conv1.get_shape())
     conv1 = tf.nn.max_pool(conv1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-    conv1 = tf.nn.dropout(conv1, keep_prob)
+    conv1 = tf.nn.dropout(conv1, keep_prob)  # (?, 25, 100, 32)
+    print('shape_of_conv1_poll_drop: %s' % conv1.get_shape())
 
     w_c2 = tf.Variable(w_alpha * tf.random_normal([3, 3, 32, 64]))
     b_c2 = tf.Variable(b_alpha * tf.random_normal([64]))
-    conv2 = tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(conv1, w_c2, strides=[1, 1, 1, 1], padding='SAME'), b_c2))
+    conv2 = tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(conv1, w_c2, strides=[1, 1, 1, 1], padding='SAME'), b_c2))  # (?, 25, 100, 64)
+    print('shape_of_conv2: %s' % conv2.get_shape())
     conv2 = tf.nn.max_pool(conv2, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-    conv2 = tf.nn.dropout(conv2, keep_prob)
+    conv2 = tf.nn.dropout(conv2, keep_prob)  # (?, 13, 50, 64)
+    print('shape_of_conv2_poll_drop: %s' % conv2.get_shape())
 
     w_c3 = tf.Variable(w_alpha * tf.random_normal([3, 3, 64, 64]))
     b_c3 = tf.Variable(b_alpha * tf.random_normal([64]))
-    conv3 = tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(conv2, w_c3, strides=[1, 1, 1, 1], padding='SAME'), b_c3))
+    conv3 = tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(conv2, w_c3, strides=[1, 1, 1, 1], padding='SAME'), b_c3))  # (?, 13, 50, 64)
+    print('shape_of_conv3: %s' % conv3.get_shape())
     conv3 = tf.nn.max_pool(conv3, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-    conv3 = tf.nn.dropout(conv3, keep_prob)
+    conv3 = tf.nn.dropout(conv3, keep_prob)  # (?, 7, 25, 64)
+    print('shape_of_conv3_poll_drop: %s' % conv3.get_shape())
 
-    # Fully connected layer
-    w_d = tf.Variable(w_alpha * tf.random_normal([8 * 20 * 64, 1024]))
+    # Fully connected layer  # 最后连接层
+    w_d = tf.Variable(w_alpha * tf.random_normal([7 * 25 * 64, 1024]))
     b_d = tf.Variable(b_alpha * tf.random_normal([1024]))
-    dense = tf.reshape(conv3, [-1, w_d.get_shape().as_list()[0]])
+    dense = tf.reshape(conv3, [-1, w_d.get_shape().as_list()[0]])  # (?, 11200)
+    print('shape_of_dense: %s' % dense.get_shape())
     dense = tf.nn.relu(tf.add(tf.matmul(dense, w_d), b_d))
     dense = tf.nn.dropout(dense, keep_prob)
+    print('shape_of_dense_poll_drop: %s' % dense.get_shape())
 
+    # 输出层
     w_out = tf.Variable(w_alpha * tf.random_normal([1024, MAX_CAPTCHA * CHAR_SET_LEN]))
     b_out = tf.Variable(b_alpha * tf.random_normal([MAX_CAPTCHA * CHAR_SET_LEN]))
-    out = tf.add(tf.matmul(dense, w_out), b_out)
+    out = tf.add(tf.matmul(dense, w_out), b_out) # (?, 44)
+    print('shape_of_out: %s' % out.get_shape())
+
     # out = tf.nn.softmax(out)
     return out
 
@@ -174,13 +190,18 @@ def crack_captcha_cnn(w_alpha=0.01, b_alpha=0.1):
 # 训练
 def train_crack_captcha_cnn():
     output = crack_captcha_cnn()
+    print('shape_of_output: %s' % output.get_shape())
+
     # loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(output, Y))
     loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=output, labels=Y))
+    print('shape_of_loss: %s' % loss.get_shape())
+
     # 最后一层用来分类的softmax和sigmoid有什么不同？
     # optimizer 为了加快训练 learning_rate应该开始大，然后慢慢衰
     optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(loss)
 
     predict = tf.reshape(output, [-1, MAX_CAPTCHA, CHAR_SET_LEN])
+    print('shape_of_predict: %s' % predict.get_shape())
     max_idx_p = tf.argmax(predict, 2)
     max_idx_l = tf.argmax(tf.reshape(Y, [-1, MAX_CAPTCHA, CHAR_SET_LEN]), 2)
     correct_pred = tf.equal(max_idx_p, max_idx_l)
@@ -193,8 +214,8 @@ def train_crack_captcha_cnn():
         step = 0
         while True:
             batch_x, batch_y = get_next_batch(64)
-            print(np.shape(batch_x))
-            print(np.shape(batch_y))
+            # print(np.shape(batch_x))
+            # print(np.shape(batch_y))
             _, loss_ = sess.run([optimizer, loss], feed_dict={X: batch_x, Y: batch_y, keep_prob: 0.75})
             print(step, loss_)
 
@@ -205,7 +226,7 @@ def train_crack_captcha_cnn():
                 print(step, acc)
                 # 如果准确率大于50%,保存模型,完成训练
                 if acc > 0.5:
-                    saver.save(sess, "crack_capcha.model", global_step=step)
+                    saver.save(sess, "./crack_capcha3/model", global_step=step)
                     break
             step += 1
 

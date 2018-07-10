@@ -4,7 +4,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-# 添加层,带有激活函数
+def get_weight(shape, lamda):
+    pass
+
+
+# 添加层,带有激活函数，但是没有考虑
 def add_layer(inputs, in_size, out_size, activation_function=None):
     """添加层"""
     # add one more layer and return the output of this layer
